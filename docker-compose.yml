@@ -1,0 +1,86 @@
+version: '3.8'
+
+# Define external network for Caddy/n8n/Postgres communication
+networks:
+  n8n_backend:
+    name: n8n_backend_net
+
+# Define persistent volumes for database and Caddy configuration
+volumes:
+  postgres_data:
+    name: n8n_postgres_data
+  caddy_data:
+    name: n8n_caddy_data
+
+services:
+  # --- n8n Service ---
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n_app
+    restart: always
+    environment:
+      # These variables are loaded from the .env file
+      - DB_TYPE=${DB_TYPE}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DATABASE=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - WEBHOOK_URL=${WEBHOOK_URL}
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
+      - N8N_BASIC_AUTH_ACTIVE=${N8N_BASIC_AUTH_ACTIVE}
+      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD}
+    
+    # REQUIRED: Expose port 5678 for direct IP access / local testing
+    ports:
+      - "5678:5678"
+    
+    volumes:
+      # The main volume for n8n's configuration and custom files
+      - n8n_app_data:/home/node/.n8n
+    
+    networks:
+      - n8n_backend
+    
+    # Wait for the database to be ready before starting n8n
+    depends_on:
+      - postgres
+
+  # --- PostgreSQL Database Service ---
+  postgres:
+    image: postgres:16
+    container_name: n8n_db
+    restart: always
+    environment:
+      # These variables are loaded from the .env file
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    
+    networks:
+      - n8n_backend
+  
+  # --- Caddy Reverse Proxy Service ---
+  caddy:
+    image: caddy:2
+    container_name: caddy_proxy
+    restart: always
+    ports:
+      # Expose standard HTTP and HTTPS ports to the outside world
+      - "80:80"
+      - "443:443"
+    
+    volumes:
+      # Map the Caddyfile and persistent data volume
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+    
+    networks:
+      - n8n_backend
+    
+    depends_on:
+      - n8n
