@@ -1,0 +1,45 @@
+## 🚀 Production-Ready n8n Deployment on Ubuntu 25.04 via Docker Compose (PostgreSQL & Caddy) for Public Use and Local Testing
+
+I require a complete, production-grade setup for an **n8n** server on an **Ubuntu 25.04** VM using **Docker Compose**. The stack must use **PostgreSQL** for persistent storage and **Caddy** as a reverse proxy for automatic HTTPS.
+
+The entire solution must be provided as a set of separate, reusable files suitable for a public GitHub repository, ensuring a completely clean start.
+
+***
+
+### 🎯 Key Requirement: Local/IP Access for Testing
+
+The `n8n` service must have its port **5678** mapped to a host port (e.g., **5678**) in the `docker-compose.yml`. This allows the instance to be temporarily accessed and tested via the VM's **IP address** (e.g., `http://192.168.1.10:5678`) before the public DNS and Caddy configuration are fully active.
+
+***
+
+### A. Initial Server Preparation Script: `01_prepare_server.sh`
+
+A complete, self-contained **shell script** named **`01_prepare_server.sh`** that performs all necessary one-time setup on a clean Ubuntu 25.04 server. This script must include:
+1.  **Full removal** of any existing Docker, Docker Compose, and associated configuration/data.
+2.  **Installation** of the latest **Docker Engine** and **Docker Compose plugin**.
+3.  **Firewall Configuration** (UFW): Installation of UFW, and opening ports **80**, **443**, and **5678** (for local testing access).
+4.  Adding the current user to the `docker` group to run commands without `sudo`.
+
+---
+
+### B. Configuration File Content Templates
+
+Provide the complete content for the following production-ready configuration files, designed for user customization:
+
+1.  **`docker-compose.yml`**: Define the `n8n`, `postgres`, and `caddy` services. **Crucially, the `n8n` service must expose port 5678 to the host.** Ensure proper internal networking, named volume mapping for persistence, and correct service dependencies (`n8n` depends on `postgres`).
+2.  **`.env.example`**: A template file containing all environment variables required by `n8n` and `postgres`. This must clearly mark placeholders for user input:
+    * **Postgres Credentials:** `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`
+    * **n8n Database Config:** `DB_TYPE` (set to `postgres`), `POSTGRES_HOST`, `POSTGRES_PORT`
+    * **n8n Security/Access:** `N8N_BASIC_AUTH_ACTIVE`, `N8N_BASIC_AUTH_USER`, `N8N_BASIC_AUTH_PASSWORD`
+    * **n8n General:** `WEBHOOK_URL` (using the public domain), `GENERIC_TIMEZONE`
+3.  **`Caddyfile`**: The configuration for the Caddy service. It must accept an environment variable (e.g., `$DOMAIN_NAME`) from the host environment to configure automatic HTTPS (Let's Encrypt) and proxy traffic to the internal `n8n` container.
+
+---
+
+### C. Deployment Script: `02_deploy_stack.sh`
+
+A final, self-contained **shell script** named **`02_deploy_stack.sh`** that provides the complete and reusable command needed to deploy the entire stack. This script should contain all necessary instructions to:
+1.  Verify the existence of the user-customized `.env` file (copied from `.env.example`).
+2.  Check for the required `$DOMAIN_NAME` environment variable before deployment (used by Caddy).
+3.  Build and start the services in detached mode (`-d`).
+4.  This script must be robust enough for **initial deployment AND for restarting the stack** after a server reboot.
