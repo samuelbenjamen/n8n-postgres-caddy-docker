@@ -1,0 +1,24 @@
+# The domain name is loaded from the environment variable DOMAIN_NAME
+{$DOMAIN_NAME} {
+    # Automatic HTTPS using Let's Encrypt
+    # This automatically handles HTTP->HTTPS redirection
+    tls {
+        # Optional: Specify email for alerts
+        # email user@example.com
+    }
+
+    # Reverse proxy requests to the internal n8n container service
+    reverse_proxy n8n:5678 {
+        # Optional: Add headers if needed, though often default is fine
+        # header_up Host {host}
+        # header_up X-Forwarded-Proto {scheme}
+    }
+
+    # Optional: Log requests
+    log {
+        output file /var/log/caddy/access.log
+    }
+
+    # Optional: Enable Gzip compression
+    # encode gzip
+}
