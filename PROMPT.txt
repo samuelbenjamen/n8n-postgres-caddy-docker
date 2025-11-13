@@ -2,7 +2,7 @@
 
 I require a complete, production-grade setup for an **n8n** server on an **Ubuntu 25.04** VM using **Docker Compose**. The stack must use **PostgreSQL** for persistent storage and **Caddy** as a reverse proxy for automatic HTTPS.
 
-The entire solution must be provided as a set of separate, reusable files suitable for a public GitHub repository, ensuring a completely clean start.
+The entire solution must be provided as a set of separate, reusable files suitable for a public GitHub repository, ensuring a completely clean start. I want to create a repository for this on GitHub, suggest a repo name, description, and the rest of the information for me. Let this include the comprehensive prompt file for this.
 
 ***
 
