@@ -6,7 +6,7 @@ This repository provides a robust, production-ready setup for n8n using Docker C
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/your-username/n8n-postgres-caddy-docker.git](https://github.com/your-username/n8n-postgres-caddy-docker.git)
+    git clone https://github.com/samuelbenjamen/n8n-postgres-caddy-docker.git
     cd n8n-postgres-caddy-docker
     ```
 
